@@ -1,11 +1,11 @@
 import { BunRuntime, BunHttpServer, BunContext } from "@effect/platform-bun"
-import { Effect, Layer, pipe } from "effect"
+import { Effect, Layer, Logger, pipe } from "effect"
 import { HttpError, RouterBuilder } from "effect-http"
+import { NodeSwaggerFiles } from "effect-http-node"
 import { HttpServer } from "@effect/platform"
 
 import { moxieApi } from "./moxie-api-spec"
 import { getUserAuctionBids } from "./functions/getUserAuctionBids"
-import { SwaggerFilesLive } from "./BunSwaggerFiles"
 
 
 const app = RouterBuilder.make(moxieApi).pipe(
@@ -17,12 +17,14 @@ const app = RouterBuilder.make(moxieApi).pipe(
   RouterBuilder.build
 );
 
-const HttpLive = HttpServer.serve(app).pipe(
+const server = pipe(
+  HttpServer.serve(app),
+  HttpServer.withLogAddress,
+  Layer.provide(NodeSwaggerFiles.SwaggerFilesLive),
   Layer.provide(BunHttpServer.layer({ port: 3000 })),
-  Layer.provide(SwaggerFilesLive),
   Layer.provide(BunContext.layer),
-  Layer.launch,
-  Effect.scoped
+  Layer.provide(Logger.pretty),
+  Layer.launch
 )
 
-BunRuntime.runMain(HttpLive)
+BunRuntime.runMain(server)
