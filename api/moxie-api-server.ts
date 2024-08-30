@@ -1,20 +1,17 @@
-import { BunRuntime, BunHttpServer, BunContext } from "@effect/platform-bun"
-import { Effect, Layer, Logger, pipe } from "effect"
-import { HttpError, RouterBuilder } from "effect-http"
-import { NodeSwaggerFiles } from "effect-http-node"
-import { HttpServer } from "@effect/platform"
+import { BunRuntime, BunHttpServer, BunContext } from "@effect/platform-bun";
+import { Effect, Layer, Logger, pipe } from "effect";
+import { HttpError, RouterBuilder } from "effect-http";
+import { NodeSwaggerFiles } from "effect-http-node";
+import { HttpServer } from "@effect/platform";
 
-import { moxieApi } from "./moxie-api-spec"
-import { getUserAuctionBids } from "./functions/getUserAuctionBids"
-
+import { moxieApi } from "./moxie-api-spec";
+import { getUserAuctionBids } from "./functions/getUserAuctionBids";
 
 const app = RouterBuilder.make(moxieApi).pipe(
   RouterBuilder.handle("getOrdersErc20", ({ body }) =>
-    pipe(
-      getUserAuctionBids(body.addressEth),
-    )
+    pipe(getUserAuctionBids(body.addressEth)),
   ),
-  RouterBuilder.build
+  RouterBuilder.build,
 );
 
 const server = pipe(
@@ -24,7 +21,7 @@ const server = pipe(
   Layer.provide(BunHttpServer.layer({ port: 3000 })),
   Layer.provide(BunContext.layer),
   Layer.provide(Logger.pretty),
-  Layer.launch
-)
+  Layer.launch,
+);
 
-BunRuntime.runMain(server)
+BunRuntime.runMain(server);

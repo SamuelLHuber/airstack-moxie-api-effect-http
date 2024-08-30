@@ -1,7 +1,7 @@
 // inspired by https://github.com/mikearnaldi/lambda-conf-2024/blob/main/src/api-spec.ts
-import { Schema as S } from "@effect/schema"
-import { pipe } from "effect"
-import { Api, ApiResponse } from "effect-http"
+import { Schema as S } from "@effect/schema";
+import { pipe } from "effect";
+import { Api, ApiResponse } from "effect-http";
 
 /**
  * Schema Definitions
@@ -9,10 +9,7 @@ import { Api, ApiResponse } from "effect-http"
 
 export class Wallet extends S.Class<Wallet>("Wallet")({
   // "Ethereum address (40 hexadecimal characters starting with 0x)"
-  addressEth: pipe(
-    S.String,
-    S.pattern(/^0x[a-fA-F0-9]{40}$/),
-  )
+  addressEth: pipe(S.String, S.pattern(/^0x[a-fA-F0-9]{40}$/)),
 }) {}
 
 export class Order extends S.Class<Order>("Order")({
@@ -21,10 +18,10 @@ export class Order extends S.Class<Order>("Order")({
   price: S.String,
   status: S.String,
   timestamp: S.String,
-  txHash: S.String
+  txHash: S.String,
 }) {}
 
-export class ApiError extends S.TaggedError<ApiError>() ("ApiError", {
+export class ApiError extends S.TaggedError<ApiError>()("ApiError", {
   message: S.String,
   details: S.String,
 }) {}
@@ -34,22 +31,17 @@ export class ApiError extends S.TaggedError<ApiError>() ("ApiError", {
  */
 
 export const moxieApi = pipe(
-  Api.make({ 
-    title: "Moxie API"
+  Api.make({
+    title: "Moxie API",
   }),
-  // Orders endpoint (using Orders placed with $MOXIE ERC20, not vested tokens)  
+  // Orders endpoint (using Orders placed with $MOXIE ERC20, not vested tokens)
   Api.addEndpoint(
     pipe(
       Api.post("getOrdersErc20", "/getorderserc20"),
       Api.setRequestBody(Wallet),
       Api.setResponseBody(S.Array(Order)),
       Api.setResponseStatus(200),
-      Api.addResponse(
-        ApiResponse.make(
-          500,
-          ApiError
-        )
-      )
-    )
+      Api.addResponse(ApiResponse.make(500, ApiError)),
+    ),
   ),
-)
+);
